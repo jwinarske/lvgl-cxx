@@ -18,7 +18,7 @@ project(
 # ── Compiler sanity check ────────────────────────────────────────────────────
 cxx = meson.get_compiler('cpp')
 if cxx.get_id() == 'gcc' and cxx.version().version_compare('< 14')
-  error('GCC >= 14 required for C++23 support (flat_map, mdspan)')
+  error('GCC >= 14 required for C++23 support')
 endif
 if cxx.get_id() == 'clang' and cxx.version().version_compare('< 17')
   error('Clang >= 17 required for C++23 support')
@@ -115,8 +115,9 @@ lvgl_cxx_sources = files(
   'src/core/object.cpp',
   'src/core/screen.cpp',
   'src/core/event.cpp',
-  # Phase 2 – Styles  (populated in Phase 2)
-  # 'src/core/style.cpp',
+  # Phase 2 – Styles
+  'src/core/style.cpp',
+  'src/core/theme.cpp',
   # Phase 3 – Events / Observer / Group
   # 'src/core/observer.cpp',
   # 'src/core/group.cpp',

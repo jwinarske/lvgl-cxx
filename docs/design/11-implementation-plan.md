@@ -75,12 +75,12 @@ milestone.  All phases use **Meson** as the build system and target C++23.
   application
 
 ### Checklist
-- [ ] `Style::set` / `Style::get` round-trip for all property types
-- [ ] Cascade resolves state-specific style before default style
-- [ ] Part selector restricts style to correct sub-part
-- [ ] Transition descriptor stored and retrieved correctly
-- [ ] `DefaultTheme::apply()` styles a freshly created `Button`
-- [ ] All Phase-2 unit tests pass
+- [x] `Style::set` / `Style::get` round-trip for all property types
+- [x] Cascade resolves state-specific style before default style
+- [x] Part selector restricts style to correct sub-part
+- [x] Transition descriptor stored and retrieved correctly
+- [x] `DefaultTheme::apply()` styles a freshly created `Button`
+- [x] All Phase-2 unit tests pass
 
 ---
 

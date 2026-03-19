@@ -37,6 +37,9 @@ struct Object::Impl {
     int32_t       scroll_y      = 0;
     bool          layout_dirty  = false;
 
+    // Phase 2: per-object style cascade list
+    StyleSheet sheet;
+
     // Validity token: shared with all ObjectRef<T> instances that point here.
     // Set to false in ~Object() so live refs become invalid atomically.
     std::shared_ptr<bool> validity_token = std::make_shared<bool>(true);
@@ -333,16 +336,28 @@ void Object::scroll_by(int32_t dx, int32_t dy, AnimEnable /*anim*/) noexcept {
 int32_t Object::scroll_x() const noexcept { return impl_->scroll_x; }
 int32_t Object::scroll_y() const noexcept { return impl_->scroll_y; }
 
-// ── Styles (Phase 2 stubs) ────────────────────────────────────────────────────
+// ── Styles (Phase 2) ──────────────────────────────────────────────────────────
 
-Object& Object::add_style(const Style& /*s*/, StyleSelector /*sel*/) {
+Object& Object::add_style(const Style& s, StyleSelector sel) {
+    impl_->sheet.add(s, sel);
+    on_style_changed();
     return *this;
 }
-Object& Object::remove_style(const Style& /*s*/, StyleSelector /*sel*/) {
+Object& Object::remove_style(const Style& s, StyleSelector sel) {
+    impl_->sheet.remove(s, sel);
+    on_style_changed();
     return *this;
 }
 Object& Object::remove_all_styles() {
+    impl_->sheet.remove_all();
+    on_style_changed();
     return *this;
+}
+
+StyleValue Object::resolve_style_value(uint16_t  prop_id,
+                                        ObjState  state,
+                                        Part      part) const noexcept {
+    return impl_->sheet.resolve(prop_id, part, state);
 }
 
 // ── Events (Phase 3 stubs) ────────────────────────────────────────────────────

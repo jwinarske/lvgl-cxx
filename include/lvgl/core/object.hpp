@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "../misc/area.hpp"  // Area, Point
+#include "style.hpp"         // Style, StyleSheet, StyleValue, StyleProperty, …
 #include "types.hpp"         // ObjFlags, ObjState, Align, StyleSelector, ...
 
 namespace lv {
@@ -33,7 +34,6 @@ namespace lv {
 class Display;
 class Screen;
 class Group;
-class Style;
 class Event;
 class DrawContext;
 class Layer;
@@ -124,10 +124,23 @@ public:
     [[nodiscard]] int32_t scroll_x() const noexcept;
     [[nodiscard]] int32_t scroll_y() const noexcept;
 
-    // ── Styles (Phase 2 stubs) ────────────────────────────────────────────────
+    // ── Styles (Phase 2) ─────────────────────────────────────────────────────
     Object& add_style(const Style& s, StyleSelector sel = {});
     Object& remove_style(const Style& s, StyleSelector sel = {});
     Object& remove_all_styles();
+
+    // Typed cascade resolver — queries the object's internal StyleSheet.
+    // Returns nullopt if no style sets the property for this (part, state).
+    template <StyleProperty P>
+    [[nodiscard]] std::optional<typename P::value_type>
+    resolve_style(P /*tag*/,
+                  ObjState state = ObjState::Default,
+                  Part     part  = Part::Main) const noexcept {
+        auto v = resolve_style_value(P::id, state, part);
+        if (auto* vp = std::get_if<typename P::value_type>(&v))
+            return *vp;
+        return std::nullopt;
+    }
 
     // ── Events (Phase 3 stubs) ────────────────────────────────────────────────
     using Handler = std::move_only_function<void(Event&)>;
@@ -159,6 +172,11 @@ protected:
 
 private:
     void do_add_child(std::unique_ptr<Object> child);
+
+    // Low-level style resolver — defined in object.cpp, delegates to Impl::sheet.
+    [[nodiscard]] StyleValue resolve_style_value(uint16_t prop_id,
+                                                  ObjState  state,
+                                                  Part      part) const noexcept;
 
     Object*                              parent_   = nullptr;
     std::vector<std::unique_ptr<Object>> children_;

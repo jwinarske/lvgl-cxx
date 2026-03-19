@@ -81,3 +81,16 @@ test(
   ),
   protocol : 'gtest',
 )
+
+# ── Phase 2 — style (Style, StyleSheet, Transition, Theme) ───────────────────
+test(
+  'style',
+  executable(
+    'test_style',
+    'unit/test_style.cpp',
+    include_directories : [inc],
+    dependencies        : [lvgl_cxx_dep, gtest_main_dep],
+    cpp_args            : test_cpp_args,
+  ),
+  protocol : 'gtest',
+)

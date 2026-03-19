@@ -8,27 +8,30 @@
 #pragma once
 
 #include <cstdint>
-#include <flat_map>
+#include <map>
 #include <optional>
 #include <variant>
+#include <vector>
 
 #include "../misc/color.hpp"
-#include "types.hpp"  // ObjState, Part, StyleSelector
+#include "transition.hpp"  // Transition, TransitionEasingFn
+#include "types.hpp"       // ObjState, Part, StyleSelector
 
 namespace lv {
 
 // Forward declarations
 class Font;
-struct Transition;
 
 // ── Style value storage ───────────────────────────────────────────────────────
+// Variant mirrors lv_style_value_t plus a Transition descriptor.
 using StyleValue = std::variant<
     std::monostate,  // property not set
     int32_t,         // coords, enums, opacity, radii
     Color,           // color values
     ColorFilter,     // gradient descriptor
     const Font*,     // non-owning font pointer
-    const void*      // non-owning image source
+    const void*,     // non-owning image source
+    Transition       // animation descriptor for state-change transitions
     >;
 
 // ── Property tag types ────────────────────────────────────────────────────────
@@ -108,6 +111,9 @@ struct TransformRotation { using value_type = int32_t; static constexpr uint16_t
 struct TransformPivotX   { using value_type = int32_t; static constexpr uint16_t id = 91; };
 struct TransformPivotY   { using value_type = int32_t; static constexpr uint16_t id = 92; };
 
+// Transition (special — stores a Transition descriptor)
+struct PropTransition { using value_type = Transition; static constexpr uint16_t id = 200; };
+
 }  // namespace prop
 
 // ── StyleProperty concept ─────────────────────────────────────────────────────
@@ -150,13 +156,85 @@ public:
         return *this;
     }
 
+    // Store a transition (covers all properties registered via for_props<>).
+    // Example: style.set_transition(Transition{300, 0}.for_props<prop::BgColor>())
+    Style& set_transition(Transition t) {
+        return set(prop::PropTransition{}, std::move(t));
+    }
+    [[nodiscard]] std::optional<Transition> get_transition() const {
+        return get(prop::PropTransition{});
+    }
+
     void                reset()  noexcept { props_.clear(); }
     [[nodiscard]] bool  empty()  const noexcept { return props_.empty(); }
     [[nodiscard]] std::size_t size() const noexcept { return props_.size(); }
 
+    // Low-level accessor used by StyleSheet cascade resolution.
+    [[nodiscard]] StyleValue get_raw(uint16_t prop_id) const noexcept {
+        auto it = props_.find(prop_id);
+        if (it == props_.end()) return std::monostate{};
+        return it->second;
+    }
+
 private:
-    // std::flat_map: sorted, contiguous, cache-friendly — requires GCC 14 / C++23
-    std::flat_map<uint16_t, StyleValue> props_;
+    // std::map: sorted, O(log n) lookup. Upgrade to std::flat_map when
+    // libstdc++ fully ships C++23 stdlib (not yet in Ubuntu 24.04 packages).
+    std::map<uint16_t, StyleValue> props_;
+};
+
+// ── StyleSheet ────────────────────────────────────────────────────────────────
+// Per-object ordered list of (Style*, StyleSelector) pairs.
+// Mirrors LVGL v9.5.0's lv_obj_style_t list in lv_obj_style.c.
+//
+// Cascade algorithm (same as LVGL v9.5.0):
+//  • Walk the list from the end (last-added = highest priority in case of tie).
+//  • An entry matches when:
+//      1. Its selector.part == query.part
+//      2. Its selector.state is a bitmask subset of the queried object state
+//         (i.e., all state bits required by the entry are active)
+//  • Among all matching entries, the one with the highest popcount of state
+//    bits wins (most-specific state).  Ties go to last-added.
+class StyleSheet {
+public:
+    StyleSheet() noexcept  = default;
+    StyleSheet(const StyleSheet&) = default;
+    StyleSheet& operator=(const StyleSheet&) = default;
+    StyleSheet(StyleSheet&&) noexcept = default;
+    StyleSheet& operator=(StyleSheet&&) noexcept = default;
+
+    /// Add a style entry.  The Style must outlive the StyleSheet entry.
+    void add(const Style& s, StyleSelector sel = {});
+
+    /// Remove all entries that point to @p s with selector @p sel.
+    void remove(const Style& s, StyleSelector sel = {});
+
+    /// Remove all entries.
+    void remove_all() noexcept;
+
+    [[nodiscard]] bool        empty() const noexcept { return entries_.empty(); }
+    [[nodiscard]] std::size_t size()  const noexcept { return entries_.size(); }
+
+    // Resolve a raw property value for (part, state) — monostate if not found.
+    [[nodiscard]] StyleValue
+    resolve(uint16_t prop_id, Part part, ObjState state) const noexcept;
+
+    // Typed resolve — returns nullopt if not set.
+    template <StyleProperty P>
+    [[nodiscard]] std::optional<typename P::value_type>
+    resolve(P /*tag*/, ObjState state = ObjState::Default,
+            Part part = Part::Main) const noexcept {
+        auto v = resolve(P::id, part, state);
+        if (auto* vp = std::get_if<typename P::value_type>(&v))
+            return *vp;
+        return std::nullopt;
+    }
+
+private:
+    struct Entry {
+        const Style*   style;
+        StyleSelector  sel;
+    };
+    std::vector<Entry> entries_;
 };
 
 }  // namespace lv
