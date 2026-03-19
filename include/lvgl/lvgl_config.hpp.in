@@ -16,8 +16,8 @@
 // ── Upstream LVGL baseline ────────────────────────────────────────────────────
 // lvgl-cxx is a C++23 native redesign based on LVGL v9.5.0.
 // https://github.com/lvgl/lvgl/releases/tag/v9.5.0
-#define LVGLCXX_LVGL_BASELINE     "@LVGLCXX_LVGL_BASELINE@"
-#define LVGLCXX_LVGL_BASELINE_URL "@LVGLCXX_LVGL_BASELINE_URL@"
+#define LVGLCXX_LVGL_BASELINE     @LVGLCXX_LVGL_BASELINE@
+#define LVGLCXX_LVGL_BASELINE_URL @LVGLCXX_LVGL_BASELINE_URL@
 
 // ── Color format ──────────────────────────────────────────────────────────────
 #define LVGLCXX_COLOR_ARGB8888  @LVGLCXX_COLOR_ARGB8888@

@@ -17,7 +17,7 @@ struct Point {
     int32_t y = 0;
 
     constexpr Point() noexcept = default;
-    constexpr Point(int32_t x, int32_t y) noexcept : x(x), y(y) {}
+    constexpr Point(int32_t px, int32_t py) noexcept : x(px), y(py) {}
 
     auto operator<=>(const Point&) const = default;
 
@@ -33,9 +33,9 @@ struct Area {
     int32_t x1 = 0, y1 = 0, x2 = 0, y2 = 0;
 
     constexpr Area() noexcept = default;
-    constexpr Area(int32_t x1, int32_t y1,
-                   int32_t x2, int32_t y2) noexcept
-        : x1(x1), y1(y1), x2(x2), y2(y2) {}
+    constexpr Area(int32_t ax1, int32_t ay1,
+                   int32_t ax2, int32_t ay2) noexcept
+        : x1(ax1), y1(ay1), x2(ax2), y2(ay2) {}
 
     // Construct from position + size
     [[nodiscard]] static constexpr Area from_size(

@@ -105,7 +105,7 @@ option(
   'enable_tests',
   type        : 'boolean',
   value       : true,
-  description : 'Build and register unit tests (requires Catch2 wrap)',
+  description : 'Build and register unit tests (requires Google Test)',
 )
 option(
   'enable_sanitizers',

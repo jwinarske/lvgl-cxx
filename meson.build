@@ -18,7 +18,7 @@ project(
 # ── Compiler sanity check ────────────────────────────────────────────────────
 cxx = meson.get_compiler('cpp')
 if cxx.get_id() == 'gcc' and cxx.version().version_compare('< 14')
-  error('GCC >= 14 required for C++23 support')
+  error('GCC >= 14 required for C++23 support (flat_map, mdspan)')
 endif
 if cxx.get_id() == 'clang' and cxx.version().version_compare('< 17')
   error('Clang >= 17 required for C++23 support')
@@ -96,8 +96,6 @@ inc = include_directories('include')
 # ── Compiler flags ───────────────────────────────────────────────────────────
 extra_args = []
 if cxx.get_id() in ['gcc', 'clang']
-  extra_args += ['-fno-exceptions', '-fno-rtti']   # opt-in to bare-metal mode
-  # Warn about anything that looks like a C-ism sneaking back in
   extra_args += ['-Wshadow', '-Wconversion', '-Wsign-conversion']
 endif
 
@@ -112,19 +110,17 @@ if opt_lto
 endif
 
 # ── Library sources ──────────────────────────────────────────────────────────
-# Source files are added phase-by-phase.  During Phase 0 the list is empty
-# and the library is a header-only interface target.
 lvgl_cxx_sources = files(
-  # Phase 1 – Core (populated in Phase 1)
-  # 'src/core/object.cpp',
-  # 'src/core/screen.cpp',
-  # Phase 2 – Styles
+  # Phase 1 – Core object tree
+  'src/core/object.cpp',
+  'src/core/screen.cpp',
+  'src/core/event.cpp',
+  # Phase 2 – Styles  (populated in Phase 2)
   # 'src/core/style.cpp',
-  # Phase 3 – Events
-  # 'src/core/event.cpp',
+  # Phase 3 – Events / Observer / Group
   # 'src/core/observer.cpp',
   # 'src/core/group.cpp',
-  # Phase 4 – Display / Renderer
+  # Phase 4 – Display / Renderer / Animations
   # 'src/draw/sw/software_renderer.cpp',
   # 'src/core/display.cpp',
   # Phase 5 – Widgets (one file per widget)
@@ -169,9 +165,7 @@ install_headers(
   subdir : 'lvgl',
 )
 install_subdir('include/lvgl/core',    install_dir : 'include/lvgl')
-install_subdir('include/lvgl/widgets', install_dir : 'include/lvgl')
 install_subdir('include/lvgl/misc',    install_dir : 'include/lvgl')
-install_subdir('include/lvgl/drivers', install_dir : 'include/lvgl')
 
 # ── Tests ─────────────────────────────────────────────────────────────────────
 if opt_tests

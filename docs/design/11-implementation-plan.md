@@ -30,9 +30,9 @@ milestone.  All phases use **Meson** as the build system and target C++23.
 - `LICENCE.txt` and `README.md`
 
 ### Checklist
-- [ ] `meson.build` compiles an empty static library
-- [ ] `meson test` runs and passes the stub test
-- [ ] CI green on all three platforms
+- [x] `meson.build` compiles an empty static library
+- [x] `meson test` runs and passes the stub test
+- [x] CI green on all three platforms
 
 ---
 
@@ -52,13 +52,13 @@ milestone.  All phases use **Meson** as the build system and target C++23.
 - Allocator plumbing through the tree
 
 ### Checklist
-- [ ] `Object::create<T>()` constructs and parents children
-- [ ] Parent destructor recursively destroys children
-- [ ] `ObjectRef<T>` nullifies on child destroy
-- [ ] Flags and states are bitwise correct
-- [ ] `set_pos`, `set_size`, `align` write to Impl fields
-- [ ] `children()` returns a correct forward range
-- [ ] All Phase-1 unit tests pass
+- [x] `Object::create<T>()` constructs and parents children
+- [x] Parent destructor recursively destroys children
+- [x] `ObjectRef<T>` nullifies on child destroy
+- [x] Flags and states are bitwise correct
+- [x] `set_pos`, `set_size`, `align` write to Impl fields
+- [x] `children()` returns a correct forward range
+- [x] All Phase-1 unit tests pass
 
 ---
 
@@ -211,7 +211,7 @@ Weeks 22-24 Phase 6 ── Drivers + Integration + Modules
 
 | Test type | Framework | Location |
 |---|---|---|
-| Unit tests | [Catch2](https://github.com/catchorg/Catch2) via Meson wrap | `tests/unit/` |
+| Unit tests | [Google Test](https://github.com/google/googletest) (system pkg or gtest.wrap) | `tests/unit/` |
 | Golden-image tests | Built-in PNG comparator | `tests/golden/` |
 | Integration tests | Meson test + QEMU | `tests/integration/` |
 | Static analysis | `clang-tidy` + CodeQL | CI only |
