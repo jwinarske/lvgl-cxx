@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2025 LVGL Kft
+# Copyright (c) 2026 Joel Winarske
+#
+# Meson WrapDB-style wrap for LVGL v9.5.0 (upstream C library).
+# Used during the porting phase to access LVGL v9.5.0 C source directly.
+# Not exposed in the public lvgl-cxx API.
+#
+# To update: replace url, revision, and hash with the desired tag.
+
+[wrap-git]
+url      = https://github.com/lvgl/lvgl.git
+revision = v9.5.0
+depth    = 1
+
+[provide]
+lvgl = lvgl_dep

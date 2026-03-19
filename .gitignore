@@ -1,0 +1,29 @@
+# Build directories
+builddir/
+build/
+_build/
+
+# Meson private
+.mesonpy/
+meson-private/
+
+# Downloaded subproject sources and package cache
+subprojects/packagecache/
+subprojects/catch2-*/
+subprojects/catch2.wrap
+subprojects/lvgl-*/
+subprojects/.wraplock
+
+# Generated config header (produced by meson setup)
+include/lvgl/lvgl_config.hpp
+
+# Editor / IDE artifacts
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS artifacts
+.DS_Store
+Thumbs.db

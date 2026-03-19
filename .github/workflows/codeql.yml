@@ -1,0 +1,64 @@
+name: CodeQL
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - "copilot/**"
+  pull_request:
+    branches:
+      - main
+      - master
+  schedule:
+    # Run weekly on Monday at 08:00 UTC
+    - cron: "0 8 * * 1"
+
+# Deny all permissions at the workflow level; each job grants only what it needs.
+permissions: {}
+
+jobs:
+  analyze:
+    name: Analyze (C/C++)
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y \
+            meson ninja-build \
+            gcc-14 g++-14
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: c-cpp
+          queries: security-extended,security-and-quality
+
+      - name: Install Meson wraps
+        run: meson wrap install catch2
+
+      - name: Configure build
+        env:
+          CC: gcc-14
+          CXX: g++-14
+        run: |
+          meson setup builddir \
+            -Dcpp_std=c++23 \
+            -Denable_tests=false \
+            --wrap-mode=forcefallback
+
+      - name: Build for analysis
+        run: ninja -C builddir
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:c-cpp"

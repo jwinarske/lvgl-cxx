@@ -1,0 +1,293 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - "copilot/**"
+  pull_request:
+    branches:
+      - main
+      - master
+
+# Deny all permissions at the workflow level; each job grants only what it needs.
+permissions: {}
+
+# ── Ubuntu ────────────────────────────────────────────────────────────────────
+jobs:
+  ubuntu:
+    name: Ubuntu (${{ matrix.compiler }})
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [gcc-14, clang-19]
+        include:
+          - compiler: gcc-14
+            CC: gcc-14
+            CXX: g++-14
+          - compiler: clang-19
+            CC: clang-19
+            CXX: clang++-19
+
+    env:
+      CC: ${{ matrix.CC }}
+      CXX: ${{ matrix.CXX }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y \
+            meson ninja-build \
+            gcc-14 g++-14 \
+            clang-19
+
+      - name: Install Meson wraps
+        run: meson wrap install catch2
+
+      - name: Configure
+        run: |
+          meson setup builddir \
+            -Dcpp_std=c++23 \
+            -Denable_tests=true \
+            --wrap-mode=forcefallback
+
+      - name: Build
+        run: ninja -C builddir
+
+      - name: Test
+        run: meson test -C builddir --print-errorlogs
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-ubuntu-${{ matrix.compiler }}
+          path: builddir/meson-logs/
+
+# ── Fedora ────────────────────────────────────────────────────────────────────
+  fedora:
+    name: Fedora (${{ matrix.compiler }})
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [gcc, clang]
+        include:
+          - compiler: gcc
+            CC: gcc
+            CXX: g++
+          - compiler: clang
+            CC: clang
+            CXX: clang++
+
+    container:
+      image: fedora:latest
+
+    env:
+      CC: ${{ matrix.CC }}
+      CXX: ${{ matrix.CXX }}
+
+    steps:
+      - name: Install git and dependencies
+        run: |
+          dnf install -y \
+            git \
+            meson ninja-build \
+            gcc gcc-c++ \
+            clang \
+            python3-pip
+
+      - uses: actions/checkout@v4
+
+      - name: Install Meson wraps
+        run: meson wrap install catch2
+
+      - name: Configure
+        run: |
+          meson setup builddir \
+            -Dcpp_std=c++23 \
+            -Denable_tests=true \
+            --wrap-mode=forcefallback
+
+      - name: Build
+        run: ninja -C builddir
+
+      - name: Test
+        run: meson test -C builddir --print-errorlogs
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-fedora-${{ matrix.compiler }}
+          path: builddir/meson-logs/
+
+# ── macOS ─────────────────────────────────────────────────────────────────────
+  macos:
+    name: macOS ${{ matrix.os-name }} (${{ matrix.compiler }})
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # arm64 — Apple Silicon, Xcode 16 (Apple Clang 16)
+          - os: macos-15
+            os-name: "15-arm64"
+            compiler: apple-clang
+            CC: clang
+            CXX: clang++
+          # arm64 — Apple Silicon, LLVM 19 from Homebrew
+          - os: macos-15
+            os-name: "15-arm64"
+            compiler: llvm-19
+            CC: ""        # set after brew install in step
+            CXX: ""
+          # x64 — Intel, LLVM 19 from Homebrew
+          - os: macos-13
+            os-name: "13-x64"
+            compiler: llvm-19
+            CC: ""
+            CXX: ""
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies (common)
+        run: brew install meson ninja
+
+      - name: Install LLVM 19 (llvm-19 builds only)
+        if: matrix.compiler == 'llvm-19'
+        run: |
+          brew install llvm@19
+          echo "$(brew --prefix llvm@19)/bin" >> "$GITHUB_PATH"
+
+      - name: Set compiler env (llvm-19)
+        if: matrix.compiler == 'llvm-19'
+        run: |
+          echo "CC=$(brew --prefix llvm@19)/bin/clang"    >> "$GITHUB_ENV"
+          echo "CXX=$(brew --prefix llvm@19)/bin/clang++" >> "$GITHUB_ENV"
+
+      - name: Set compiler env (apple-clang)
+        if: matrix.compiler == 'apple-clang'
+        run: |
+          echo "CC=clang"   >> "$GITHUB_ENV"
+          echo "CXX=clang++" >> "$GITHUB_ENV"
+
+      - name: Install Meson wraps
+        run: meson wrap install catch2
+
+      - name: Configure
+        run: |
+          meson setup builddir \
+            -Dcpp_std=c++23 \
+            -Denable_tests=true \
+            --wrap-mode=forcefallback
+
+      - name: Build
+        run: ninja -C builddir
+
+      - name: Test
+        run: meson test -C builddir --print-errorlogs
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.os-name }}-${{ matrix.compiler }}
+          path: builddir/meson-logs/
+
+# ── Windows x64 ───────────────────────────────────────────────────────────────
+  windows-x64:
+    name: Windows x64 (MSVC)
+    runs-on: windows-2022
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up MSVC (amd64)
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64
+
+      - name: Install Meson and Ninja
+        run: pip install meson ninja
+
+      - name: Install Meson wraps
+        run: meson wrap install catch2
+
+      - name: Configure
+        run: |
+          meson setup builddir `
+            -Dcpp_std=c++latest `
+            -Denable_tests=true `
+            --wrap-mode=forcefallback
+        shell: pwsh
+
+      - name: Build
+        run: ninja -C builddir
+
+      - name: Test
+        run: meson test -C builddir --print-errorlogs
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-windows-x64-msvc
+          path: builddir/meson-logs/
+
+# ── Windows arm64 ─────────────────────────────────────────────────────────────
+  windows-arm64:
+    name: Windows arm64 (MSVC)
+    runs-on: windows-11-arm
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up MSVC (arm64)
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: arm64
+
+      - name: Install Meson and Ninja
+        run: pip install meson ninja
+
+      - name: Install Meson wraps
+        run: meson wrap install catch2
+
+      - name: Configure
+        run: |
+          meson setup builddir `
+            -Dcpp_std=c++latest `
+            -Denable_tests=true `
+            --wrap-mode=forcefallback
+        shell: pwsh
+
+      - name: Build
+        run: ninja -C builddir
+
+      - name: Test
+        run: meson test -C builddir --print-errorlogs
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-windows-arm64-msvc
+          path: builddir/meson-logs/
