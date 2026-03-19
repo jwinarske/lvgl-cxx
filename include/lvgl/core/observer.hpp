@@ -14,7 +14,8 @@
 #include <string>
 #include <vector>
 
-#include "../misc/color.hpp"  // Color — needed for ColorSubject
+#include "../misc/color.hpp"    // Color — needed for ColorSubject
+#include "../misc/function.hpp" // lv::UniqueFunction
 
 namespace lv {
 
@@ -83,7 +84,7 @@ public:
     // then again on every subsequent change.
     // The returned RAII handle auto-unsubscribes on destruction.
     [[nodiscard]] ObserverHandle
-    subscribe(std::move_only_function<void(const T&)> fn) {
+    subscribe(UniqueFunction<void(const T&)> fn) {
         fn(value_);  // immediate call with current value
         auto entry = std::make_shared<Entry>(std::move(fn));
         subscribers_.push_back(entry);
@@ -92,9 +93,9 @@ public:
 
 private:
     struct Entry {
-        std::move_only_function<void(const T&)> fn;
+        UniqueFunction<void(const T&)> fn;
         bool active = true;
-        explicit Entry(std::move_only_function<void(const T&)> f)
+        explicit Entry(UniqueFunction<void(const T&)> f)
             : fn(std::move(f)) {}
     };
 

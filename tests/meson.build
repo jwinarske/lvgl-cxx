@@ -94,3 +94,16 @@ test(
   ),
   protocol : 'gtest',
 )
+
+# ── Phase 3 — events, observer, group ────────────────────────────────────────
+test(
+  'event',
+  executable(
+    'test_event',
+    'unit/test_event.cpp',
+    include_directories : [inc],
+    dependencies        : [lvgl_cxx_dep, gtest_main_dep],
+    cpp_args            : test_cpp_args,
+  ),
+  protocol : 'gtest',
+)

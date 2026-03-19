@@ -12,6 +12,7 @@
 #include "lvgl/core/event.hpp"
 #include "lvgl/core/object.hpp"
 #include "lvgl/core/types.hpp"
+#include "lvgl/misc/function.hpp"  // lv::UniqueFunction
 
 #include <algorithm>
 #include <cstdint>
@@ -28,8 +29,8 @@ struct Group::Impl {
     bool                 wrap        = true;
     bool                 freeze      = false;
 
-    std::move_only_function<void(Group&)>       on_focus_change;
-    std::move_only_function<void(Group&, bool)> on_edge;
+    UniqueFunction<void(Group&)>       on_focus_change;
+    UniqueFunction<void(Group&, bool)> on_edge;
 };
 
 // ── Static default group ──────────────────────────────────────────────────────
@@ -185,10 +186,10 @@ const Object* Group::focused() const noexcept {
 
 // ── Policy / Options ──────────────────────────────────────────────────────────
 
-void Group::set_on_focus_change(std::move_only_function<void(Group&)> fn) {
+void Group::set_on_focus_change(UniqueFunction<void(Group&)> fn) {
     impl_->on_focus_change = std::move(fn);
 }
-void Group::set_on_edge(std::move_only_function<void(Group&, bool)> fn) {
+void Group::set_on_edge(UniqueFunction<void(Group&, bool)> fn) {
     impl_->on_edge = std::move(fn);
 }
 void Group::set_refocus_policy(RefocusPolicy p) noexcept { impl_->policy  = p; }

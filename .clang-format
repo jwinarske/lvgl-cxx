@@ -2,7 +2,7 @@
 # http://clang.llvm.org/docs/ClangFormatStyleOptions.html
 # Based on jwinarske/wayland-cxx-scanner .clang-format
 BasedOnStyle: Chromium
-Standard: c++23
+Standard: Latest
 SortIncludes: CaseSensitive
 ---
 Language: ObjC

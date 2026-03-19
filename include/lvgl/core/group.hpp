@@ -15,6 +15,8 @@
 #include <memory>
 #include <vector>
 
+#include "../misc/function.hpp"  // lv::UniqueFunction
+
 namespace lv {
 
 class Object;
@@ -48,8 +50,8 @@ public:
     [[nodiscard]] const Object* focused() const noexcept;
 
     // Navigation callbacks
-    void set_on_focus_change(std::move_only_function<void(Group&)> fn);
-    void set_on_edge(std::move_only_function<void(Group&, bool)> fn);
+    void set_on_focus_change(UniqueFunction<void(Group&)> fn);
+    void set_on_edge(UniqueFunction<void(Group&, bool)> fn);
 
     // Policy
     void set_refocus_policy(RefocusPolicy p) noexcept;

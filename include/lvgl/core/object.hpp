@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "../misc/area.hpp"  // Area, Point
+#include "../misc/function.hpp"  // lv::UniqueFunction
 #include "style.hpp"         // Style, StyleSheet, StyleValue, StyleProperty, …
 #include "types.hpp"         // ObjFlags, ObjState, Align, StyleSelector, ...
 
@@ -143,7 +144,7 @@ public:
     }
 
     // ── Events (Phase 3) ─────────────────────────────────────────────────────
-    using Handler = std::move_only_function<void(Event&)>;
+    using Handler = UniqueFunction<void(Event&)>;
     [[nodiscard]] EventHandle on(EventCode code, Handler handler);
     void remove_event(EventHandle& h);
     void send_event(EventCode code, void* param = nullptr);
