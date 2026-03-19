@@ -12,6 +12,8 @@
 
 #include <cstdint>
 #include <functional>
+#include <memory>
+#include <vector>
 
 namespace lv {
 
@@ -68,6 +70,8 @@ public:
     void send_key(uint32_t key);
 
 private:
+    void do_focus(int new_idx) noexcept;  // internal focus helper
+
     struct Impl;
     std::unique_ptr<Impl> impl_;
 };

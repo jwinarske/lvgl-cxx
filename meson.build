@@ -119,8 +119,8 @@ lvgl_cxx_sources = files(
   'src/core/style.cpp',
   'src/core/theme.cpp',
   # Phase 3 – Events / Observer / Group
-  # 'src/core/observer.cpp',
-  # 'src/core/group.cpp',
+  'src/core/observer.cpp',
+  'src/core/group.cpp',
   # Phase 4 – Display / Renderer / Animations
   # 'src/draw/sw/software_renderer.cpp',
   # 'src/core/display.cpp',

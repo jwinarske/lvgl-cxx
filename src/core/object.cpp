@@ -7,8 +7,8 @@
 //
 // Implementation of lv::Object — the base class for every widget in the tree.
 // Phase 1: object tree, flags, states, geometry (set_pos/size/align), scroll.
-// Phase 2: style methods (stubs).
-// Phase 3: event methods (stubs).
+// Phase 2: style methods.
+// Phase 3: event dispatch, bubbling, trickle, RAII EventHandle.
 
 #include "lvgl/core/object.hpp"
 
@@ -17,7 +17,7 @@
 #include <memory>
 #include <stdexcept>
 
-#include "lvgl/core/event.hpp"   // EventHandle (for remove_event stub)
+#include "lvgl/core/event.hpp"   // EventHandle, Event
 #include "lvgl/core/screen.hpp"  // Screen (for screen()/display() traversal)
 
 namespace lv {
@@ -40,29 +40,81 @@ struct Object::Impl {
     // Phase 2: per-object style cascade list
     StyleSheet sheet;
 
+    // Phase 3: registered event handlers.
+    // Each entry carries a stable 64-bit ID so that EventHandle can target it
+    // for removal.  Entries are not erased while dispatch_depth > 0; they are
+    // marked inactive and purged after the outermost dispatch returns.
+    struct HandlerEntry {
+        EventCode      code;
+        Object::Handler fn;
+        uint64_t       id;
+        bool           active = true;
+    };
+    std::vector<HandlerEntry> handlers;
+    uint64_t next_handler_id = 0;
+    int      dispatch_depth  = 0;  // re-entrancy depth for lazy deletion
+
     // Validity token: shared with all ObjectRef<T> instances that point here.
     // Set to false in ~Object() so live refs become invalid atomically.
     std::shared_ptr<bool> validity_token = std::make_shared<bool>(true);
 };
 
+// ── EventHandle::Impl ────────────────────────────────────────────────────────
+// Defined here (in object.cpp) because Object is a friend of EventHandle and
+// because the impl stores a pointer back into Object::Impl.  event.cpp only
+// defines the Event class.
+
+struct EventHandle::Impl {
+    std::weak_ptr<bool> object_validity;  // weak ref to Object's validity token
+    Object*             object;           // safe to dereference only if token live
+    uint64_t            handler_id;
+};
+
+// ── EventHandle ──────────────────────────────────────────────────────────────
+
+EventHandle::EventHandle() noexcept = default;
+
+EventHandle::~EventHandle() {
+    // RAII removal: if not released, remove the handler from its owner.
+    remove();
+}
+
+EventHandle::EventHandle(EventHandle&&) noexcept = default;
+EventHandle& EventHandle::operator=(EventHandle&&) noexcept = default;
+
+void EventHandle::remove() noexcept {
+    if (!impl_) return;
+    // Only remove if the owning Object is still alive
+    auto sp = impl_->object_validity.lock();
+    if (sp && *sp && impl_->object)
+        impl_->object->remove_event(*this);
+    impl_.reset();
+}
+
+void EventHandle::release() noexcept {
+    // Detach from RAII: handler keeps running until the Object is destroyed.
+    impl_.reset();
+}
+
+bool EventHandle::valid() const noexcept {
+    if (!impl_) return false;
+    auto sp = impl_->object_validity.lock();
+    return sp && *sp;
+}
+
 // ── Constructor / Destructor ──────────────────────────────────────────────────
 
 Object::Object(Object* parent)
-    : parent_(parent), impl_(std::make_unique<Impl>()) {
-    if (parent_) {
-        // do_add_child is called by create<T>() AFTER construction, so the
-        // object is not yet in parent's children_ here.  Nothing to do.
-    }
-}
+    : parent_(parent), impl_(std::make_unique<Impl>()) {}
 
 Object::~Object() {
     // NOTE: calling on_delete() here would only dispatch to Object::on_delete()
     // because C++ resets the vtable to the base class type during destruction.
     // Derived classes MUST call on_delete() from their own destructor bodies if
-    // they need the pre-deletion lifecycle hook.  The framework sends
-    // EventCode::Deleted in Phase 3 via the event system before destruction.
+    // they need the pre-deletion lifecycle hook.
 
-    // Invalidate all outstanding ObjectRefs before children are destroyed.
+    // Invalidate all outstanding ObjectRefs and EventHandles before children
+    // are destroyed.
     *impl_->validity_token = false;
     // children_ unique_ptrs are destroyed here (recursive).
 }
@@ -360,16 +412,92 @@ StyleValue Object::resolve_style_value(uint16_t  prop_id,
     return impl_->sheet.resolve(prop_id, part, state);
 }
 
-// ── Events (Phase 3 stubs) ────────────────────────────────────────────────────
+// ── Events (Phase 3) ─────────────────────────────────────────────────────────
 
-EventHandle Object::on(EventCode /*code*/, Handler /*handler*/) {
-    return EventHandle{};
+EventHandle Object::on(EventCode code, Handler handler) {
+    const uint64_t id = ++impl_->next_handler_id;
+    impl_->handlers.push_back({code, std::move(handler), id, true});
+
+    auto h_impl = std::make_unique<EventHandle::Impl>();
+    h_impl->object_validity = impl_->validity_token;
+    h_impl->object           = this;
+    h_impl->handler_id       = id;
+
+    EventHandle h;
+    h.impl_ = std::move(h_impl);
+    return h;
 }
-void Object::remove_event(EventHandle& /*h*/) {}
+
+void Object::remove_event(EventHandle& h) {
+    if (!h.impl_) return;
+    const uint64_t id = h.impl_->handler_id;
+    for (auto& e : impl_->handlers) {
+        if (e.id == id) {
+            e.active = false;
+            break;
+        }
+    }
+    // Do not reset h.impl_ here — the caller (EventHandle::remove) does that.
+    // Purge immediately only when not inside a dispatch loop.
+    if (impl_->dispatch_depth == 0) {
+        std::erase_if(impl_->handlers,
+                      [](const auto& en) { return !en.active; });
+    }
+}
+
+void Object::do_dispatch_handlers(Event& e) noexcept {
+    ++impl_->dispatch_depth;
+    // Index-based loop so handlers added during dispatch are not visited now.
+    const std::size_t n = impl_->handlers.size();
+    for (std::size_t i = 0; i < n; ++i) {
+        auto& entry = impl_->handlers[i];
+        if (!entry.active) continue;
+        if (entry.code != e.code()) continue;
+        entry.fn(e);
+        if (e.is_stopped()) break;
+    }
+    if (--impl_->dispatch_depth == 0) {
+        std::erase_if(impl_->handlers,
+                      [](const auto& en) { return !en.active; });
+    }
+}
+
 void Object::send_event(EventCode code, void* param) {
-    // Phase 1: call on_event directly on this object only (no bubbling/trickle).
     Event e{*this, code, param};
+
+    // 1. Virtual lifecycle hook (derived classes override this)
     on_event(e);
+    if (e.is_stopped()) return;
+
+    // 2. Registered handlers on this object
+    do_dispatch_handlers(e);
+    if (e.is_stopped()) return;
+
+    // 3. Trickle: propagate DOWN to each direct child when EventTrickle flag set.
+    //    current_target_ is updated so handlers see which object they are on.
+    if (has_flag(ObjFlags::EventTrickle)) {
+        for (auto& child_ptr : children_) {
+            if (e.is_stopped()) break;
+            e.current_target_ = child_ptr.get();
+            child_ptr->do_dispatch_handlers(e);
+        }
+        if (e.is_stopped()) return;
+        e.current_target_ = this;
+    }
+
+    // 4. Bubble: walk UP the parent chain while EventBubble flag is set.
+    if (!e.is_bubbling_stopped() && has_flag(ObjFlags::EventBubble)) {
+        Object* cur = parent_;
+        while (cur && !e.is_stopped() && !e.is_bubbling_stopped()) {
+            e.current_target_ = cur;
+            cur->do_dispatch_handlers(e);
+            // Continue bubbling only if the parent also has EventBubble
+            if (cur->has_flag(ObjFlags::EventBubble))
+                cur = cur->parent_;
+            else
+                break;
+        }
+    }
 }
 
 // ── Layout ────────────────────────────────────────────────────────────────────

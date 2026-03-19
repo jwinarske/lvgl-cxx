@@ -142,7 +142,7 @@ public:
         return std::nullopt;
     }
 
-    // ── Events (Phase 3 stubs) ────────────────────────────────────────────────
+    // ── Events (Phase 3) ─────────────────────────────────────────────────────
     using Handler = std::move_only_function<void(Event&)>;
     [[nodiscard]] EventHandle on(EventCode code, Handler handler);
     void remove_event(EventHandle& h);
@@ -177,6 +177,10 @@ private:
     [[nodiscard]] StyleValue resolve_style_value(uint16_t prop_id,
                                                   ObjState  state,
                                                   Part      part) const noexcept;
+
+    // Internal event dispatch: calls all matching handlers on *this only.
+    // Used by send_event for both direct dispatch and bubble/trickle propagation.
+    void do_dispatch_handlers(Event& e) noexcept;
 
     Object*                              parent_   = nullptr;
     std::vector<std::unique_ptr<Object>> children_;

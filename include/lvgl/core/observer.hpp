@@ -14,6 +14,8 @@
 #include <string>
 #include <vector>
 
+#include "../misc/color.hpp"  // Color — needed for ColorSubject
+
 namespace lv {
 
 class Object;
@@ -35,17 +37,31 @@ public:
     explicit operator bool() const noexcept { return valid(); }
 
 private:
-    friend class SubjectBase;
+    // Internal factory called by Subject<T>::make_handle (type-erased so the
+    // template can produce a handle without needing Impl to be complete here).
+    static ObserverHandle from_parts(std::shared_ptr<void>  keep_alive,
+                                     std::function<void()>  deactivate) noexcept;
+
+    template <typename T> friend class Subject;
+
     struct Impl;
     std::unique_ptr<Impl> impl_;
 };
 
 // ── Subject<T> ────────────────────────────────────────────────────────────────
-template<typename T>
+// Holds a value; registered observers are notified whenever it changes.
+// Mirrors lv_subject_t in LVGL v9.5.0 (src/core/lv_obj_property.c).
+template <typename T>
 class Subject {
 public:
     explicit Subject(T initial = T{})
         : value_(std::move(initial)) {}
+
+    // Non-copyable (each Subject has a unique identity and subscriber list)
+    Subject(const Subject&)            = delete;
+    Subject& operator=(const Subject&) = delete;
+    Subject(Subject&&) noexcept        = default;
+    Subject& operator=(Subject&&) noexcept = default;
 
     // Get / set
     [[nodiscard]] const T& get() const noexcept { return value_; }
@@ -56,25 +72,23 @@ public:
         notify();
     }
 
-    // Modify in-place (useful for complex types)
-    template<typename F>
+    // Modify in-place (useful for complex types that can't use ==)
+    template <typename F>
     void modify(F&& fn) {
         fn(value_);
         notify();
     }
 
-    // Subscribe — fn is called immediately with current value, then on each change.
-    [[nodiscard]] ObserverHandle subscribe(
-            std::move_only_function<void(const T&)> fn) {
-        fn(value_);                              // immediate call
+    // Subscribe — fn is called immediately with the current value,
+    // then again on every subsequent change.
+    // The returned RAII handle auto-unsubscribes on destruction.
+    [[nodiscard]] ObserverHandle
+    subscribe(std::move_only_function<void(const T&)> fn) {
+        fn(value_);  // immediate call with current value
         auto entry = std::make_shared<Entry>(std::move(fn));
         subscribers_.push_back(entry);
         return make_handle(entry);
     }
-
-    // Convenience: bind subject value to obj.set_text() (requires std::format)
-    // Returns RAII handle — destroy to unbind.
-    [[nodiscard]] ObserverHandle bind_label_text(Object& obj);
 
 private:
     struct Entry {
@@ -85,26 +99,33 @@ private:
     };
 
     void notify() {
-        for (auto& wp : subscribers_) {
-            if (auto sp = wp.lock(); sp && sp->active)
+        for (auto& sp : subscribers_) {
+            if (sp && sp->active)
                 sp->fn(value_);
         }
-        // Purge expired weak_ptrs
-        std::erase_if(subscribers_, [](auto& wp){ return wp.expired(); });
+        // Purge entries that have been deactivated
+        std::erase_if(subscribers_, [](auto& sp) {
+            return !sp || !sp->active;
+        });
     }
 
-    ObserverHandle make_handle(std::shared_ptr<Entry> entry);
+    ObserverHandle make_handle(std::shared_ptr<Entry> entry) {
+        return ObserverHandle::from_parts(
+            entry,
+            [e = entry]() noexcept { e->active = false; });
+    }
 
     T value_;
-    std::vector<std::weak_ptr<Entry>> subscribers_;
+    // Strong references: the Subject keeps the Entry alive; the handle also
+    // holds one.  release() on the handle drops the handle's reference while
+    // leaving the Subject's strong reference, keeping the subscription alive.
+    std::vector<std::shared_ptr<Entry>> subscribers_;
 };
 
 // ── Common specialisations ────────────────────────────────────────────────────
 using IntSubject    = Subject<int32_t>;
 using FloatSubject  = Subject<float>;
 using StringSubject = Subject<std::string>;
-using ColorSubject  = Subject<Color>;   // Color from misc/color.hpp
+using ColorSubject  = Subject<Color>;
 
-} // namespace lv
-
-#include "../misc/color.hpp"   // needed for ColorSubject
+}  // namespace lv

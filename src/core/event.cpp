@@ -5,39 +5,14 @@
 // lvgl-cxx — src/core/event.cpp
 // Upstream LVGL baseline: v9.5.0  https://github.com/lvgl/lvgl/releases/tag/v9.5.0
 //
-// Phase 1 stubs for EventHandle and Event.
-// Full implementation arrives in Phase 3 (event dispatch, bubbling, RAII token).
+// Phase 3: Event class implementation.
+// Note: EventHandle is defined in object.cpp because its Impl is coupled to
+//       Object::Impl (handler list + validity token).
 
 #include "lvgl/core/event.hpp"
 #include "lvgl/core/object.hpp"
 
 namespace lv {
-
-// ── EventHandle::Impl ─────────────────────────────────────────────────────────
-// Phase 3 will populate this with a back-pointer to the owning Object and a
-// handler ID so that RAII removal works correctly.
-
-struct EventHandle::Impl {
-    // placeholder — filled in Phase 3
-};
-
-// ── EventHandle ───────────────────────────────────────────────────────────────
-
-EventHandle::EventHandle() noexcept = default;
-EventHandle::~EventHandle() = default;
-
-EventHandle::EventHandle(EventHandle&&) noexcept = default;
-EventHandle& EventHandle::operator=(EventHandle&&) noexcept = default;
-
-void EventHandle::release() noexcept {
-    impl_.reset();
-}
-void EventHandle::remove() noexcept {
-    impl_.reset();
-}
-bool EventHandle::valid() const noexcept {
-    return impl_ != nullptr;
-}
 
 // ── Event ─────────────────────────────────────────────────────────────────────
 
@@ -60,8 +35,18 @@ const Object& Event::current_target() const noexcept {
     return *current_target_;
 }
 
-uint32_t           Event::key()         const { return 0; }
-int32_t            Event::rotary_diff() const { return 0; }
+// Parameter accessors — most are only valid for specific EventCode values.
+// param_ is cast to the appropriate type per event code.
+
+uint32_t Event::key() const {
+    // EventCode::Key stores the key code as a uintptr_t cast through void*.
+    if (code_ != EventCode::Key) return 0;
+    return static_cast<uint32_t>(reinterpret_cast<uintptr_t>(param_));
+}
+int32_t Event::rotary_diff() const {
+    if (code_ != EventCode::Rotary) return 0;
+    return static_cast<int32_t>(reinterpret_cast<intptr_t>(param_));
+}
 const InputDevice* Event::indev()       const { return nullptr; }
 Layer*             Event::layer()       const { return nullptr; }
 ObjState           Event::prev_state()  const { return ObjState::Default; }
