@@ -2,20 +2,20 @@
 
 ## 1. C → C++23 Mapping
 
-| C (LVGL v9.5.0) | C++23 (lvgl-cxx) |
-|---|---|
-| `lv_event_t` struct | `lv::Event` value type passed by reference |
-| `lv_event_code_t` enum | `lv::EventCode` enum class |
-| `lv_event_cb_t` function pointer | `std::move_only_function<void(Event&)>` |
+| C (LVGL v9.5.0)                                   | C++23 (lvgl-cxx)                             |
+|---------------------------------------------------|----------------------------------------------|
+| `lv_event_t` struct                               | `lv::Event` value type passed by reference   |
+| `lv_event_code_t` enum                            | `lv::EventCode` enum class                   |
+| `lv_event_cb_t` function pointer                  | `std::move_only_function<void(Event&)>`      |
 | `lv_obj_add_event_cb(obj, cb, filter, user_data)` | `obj.on(EventCode, handler)` → `EventHandle` |
-| `lv_obj_remove_event_dsc` | `obj.remove_event(handle)` |
-| `lv_obj_send_event` | `obj.send_event(EventCode)` |
-| `lv_event_get_target_obj` | `e.target<T>()` |
-| `lv_event_get_indev` | `e.indev()` |
-| `lv_event_get_key` | `e.key()` |
-| `lv_event_get_param` | replaced by typed accessors per event code |
-| `lv_event_stop_processing` | `e.stop()` |
-| `lv_event_stop_bubbling` | `e.stop_bubbling()` |
+| `lv_obj_remove_event_dsc`                         | `obj.remove_event(handle)`                   |
+| `lv_obj_send_event`                               | `obj.send_event(EventCode)`                  |
+| `lv_event_get_target_obj`                         | `e.target<T>()`                              |
+| `lv_event_get_indev`                              | `e.indev()`                                  |
+| `lv_event_get_key`                                | `e.key()`                                    |
+| `lv_event_get_param`                              | replaced by typed accessors per event code   |
+| `lv_event_stop_processing`                        | `e.stop()`                                   |
+| `lv_event_stop_bubbling`                          | `e.stop_bubbling()`                          |
 
 ## 2. `EventCode` Enum Class
 

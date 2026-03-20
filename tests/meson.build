@@ -107,3 +107,107 @@ test(
   ),
   protocol : 'gtest',
 )
+
+# ── Phase 4 — draw buffer ────────────────────────────────────────────────────
+test(
+  'draw_buffer',
+  executable(
+    'test_draw_buffer',
+    'unit/test_draw_buffer.cpp',
+    include_directories : [inc],
+    dependencies        : [gtest_main_dep, generated_conf_dep],
+    cpp_args            : test_cpp_args,
+  ),
+  protocol : 'gtest',
+)
+
+# ── Phase 4 — layer ──────────────────────────────────────────────────────────
+test(
+  'layer',
+  executable(
+    'test_layer',
+    'unit/test_layer.cpp',
+    include_directories : [inc],
+    dependencies        : [gtest_main_dep, generated_conf_dep],
+    cpp_args            : test_cpp_args,
+  ),
+  protocol : 'gtest',
+)
+
+# ── Phase 4 — software renderer ─────────────────────────────────────────────
+test(
+  'software_renderer',
+  executable(
+    'test_software_renderer',
+    'unit/test_software_renderer.cpp',
+    include_directories : [inc],
+    dependencies        : [lvgl_cxx_dep, gtest_main_dep],
+    cpp_args            : test_cpp_args,
+  ),
+  protocol : 'gtest',
+)
+
+# ── Phase 4 — display ────────────────────────────────────────────────────────
+test(
+  'display',
+  executable(
+    'test_display',
+    'unit/test_display.cpp',
+    include_directories : [inc],
+    dependencies        : [lvgl_cxx_dep, gtest_main_dep],
+    cpp_args            : test_cpp_args,
+  ),
+  protocol : 'gtest',
+)
+
+# ── Phase 4 — animation and tick ─────────────────────────────────────────────
+test(
+  'animation',
+  executable(
+    'test_animation',
+    'unit/test_animation.cpp',
+    include_directories : [inc],
+    dependencies        : [lvgl_cxx_dep, gtest_main_dep],
+    cpp_args            : test_cpp_args,
+  ),
+  protocol : 'gtest',
+)
+
+# ── Phase 5 — widgets ────────────────────────────────────────────────────────
+test(
+  'widgets',
+  executable(
+    'test_widgets',
+    'unit/test_widgets.cpp',
+    include_directories : [inc],
+    dependencies        : [lvgl_cxx_dep, gtest_main_dep],
+    cpp_args            : test_cpp_args,
+  ),
+  protocol : 'gtest',
+)
+
+# ── Font and text rendering ──────────────────────────────────────────────────
+test(
+  'font',
+  executable(
+    'test_font',
+    'unit/test_font.cpp',
+    include_directories : [inc],
+    dependencies        : [lvgl_cxx_dep, gtest_main_dep],
+    cpp_args            : test_cpp_args,
+  ),
+  protocol : 'gtest',
+)
+
+# ── Phase 6 — drivers, input devices, integration ───────────────────────────
+test(
+  'drivers',
+  executable(
+    'test_drivers',
+    'unit/test_drivers.cpp',
+    include_directories : [inc],
+    dependencies        : [lvgl_cxx_dep, gtest_main_dep],
+    cpp_args            : test_cpp_args,
+  ),
+  protocol : 'gtest',
+)

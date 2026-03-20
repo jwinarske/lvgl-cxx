@@ -3,7 +3,8 @@
 // Copyright (c) 2026 Joel Winarske
 //
 // lvgl-cxx — src/core/screen.cpp
-// Upstream LVGL baseline: v9.5.0  https://github.com/lvgl/lvgl/releases/tag/v9.5.0
+// Upstream LVGL baseline: v9.5.0
+// https://github.com/lvgl/lvgl/releases/tag/v9.5.0
 
 #include "lvgl/core/screen.hpp"
 
@@ -16,10 +17,10 @@ Screen::Screen(Display* display)
 Screen::~Screen() = default;
 
 Display* Screen::owner_display() noexcept {
-    return display_;
+  return display_;
 }
 const Display* Screen::owner_display() const noexcept {
-    return display_;
+  return display_;
 }
 
 void Screen::on_create() {}

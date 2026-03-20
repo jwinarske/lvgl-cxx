@@ -5,40 +5,40 @@ inherits (directly or transitively) from `lv::Object`.
 
 ## Naming Convention
 
-| C (LVGL v9.5.0) | C++23 (lvgl-cxx) |
-|---|---|
-| `lv_label_t` / `lv_label_*` | `lv::Label` |
-| `lv_button_t` / `lv_button_*` | `lv::Button` |
-| `lv_slider_t` / `lv_slider_*` | `lv::Slider` |
-| `lv_arc_t` / `lv_arc_*` | `lv::Arc` |
-| `lv_bar_t` / `lv_bar_*` | `lv::Bar` |
-| `lv_switch_t` / `lv_switch_*` | `lv::Switch` |
-| `lv_checkbox_t` / `lv_checkbox_*` | `lv::Checkbox` |
-| `lv_dropdown_t` / `lv_dropdown_*` | `lv::Dropdown` |
-| `lv_roller_t` / `lv_roller_*` | `lv::Roller` |
-| `lv_textarea_t` / `lv_textarea_*` | `lv::TextArea` |
-| `lv_keyboard_t` / `lv_keyboard_*` | `lv::Keyboard` |
-| `lv_image_t` / `lv_image_*` | `lv::Image` |
-| `lv_animimage_t` / `lv_animimage_*` | `lv::AnimImage` |
-| `lv_imagebutton_t` / `lv_imagebutton_*` | `lv::ImageButton` |
-| `lv_label_t` arc variant | `lv::ArcLabel` |
-| `lv_line_t` / `lv_line_*` | `lv::Line` |
-| `lv_canvas_t` / `lv_canvas_*` | `lv::Canvas` |
-| `lv_chart_t` / `lv_chart_*` | `lv::Chart` |
-| `lv_table_t` / `lv_table_*` | `lv::Table` |
-| `lv_buttonmatrix_t` | `lv::ButtonMatrix` |
-| `lv_scale_t` / `lv_scale_*` | `lv::Scale` |
-| `lv_led_t` / `lv_led_*` | `lv::Led` |
-| `lv_list_t` / `lv_list_*` | `lv::List` |
-| `lv_msgbox_t` / `lv_msgbox_*` | `lv::MsgBox` |
-| `lv_calendar_t` / `lv_calendar_*` | `lv::Calendar` |
-| `lv_span_t` / `lv_span_*` | `lv::Span` |
-| `lv_spinbox_t` / `lv_spinbox_*` | `lv::SpinBox` |
-| `lv_spinner_t` / `lv_spinner_*` | `lv::Spinner` |
-| `lv_tabview_t` / `lv_tabview_*` | `lv::TabView` |
-| `lv_tileview_t` / `lv_tileview_*` | `lv::TileView` |
-| `lv_win_t` / `lv_win_*` | `lv::Window` |
-| `lv_menu_t` / `lv_menu_*` | `lv::Menu` |
+| C (LVGL v9.5.0)                         | C++23 (lvgl-cxx)   |
+|-----------------------------------------|--------------------|
+| `lv_label_t` / `lv_label_*`             | `lv::Label`        |
+| `lv_button_t` / `lv_button_*`           | `lv::Button`       |
+| `lv_slider_t` / `lv_slider_*`           | `lv::Slider`       |
+| `lv_arc_t` / `lv_arc_*`                 | `lv::Arc`          |
+| `lv_bar_t` / `lv_bar_*`                 | `lv::Bar`          |
+| `lv_switch_t` / `lv_switch_*`           | `lv::Switch`       |
+| `lv_checkbox_t` / `lv_checkbox_*`       | `lv::Checkbox`     |
+| `lv_dropdown_t` / `lv_dropdown_*`       | `lv::Dropdown`     |
+| `lv_roller_t` / `lv_roller_*`           | `lv::Roller`       |
+| `lv_textarea_t` / `lv_textarea_*`       | `lv::TextArea`     |
+| `lv_keyboard_t` / `lv_keyboard_*`       | `lv::Keyboard`     |
+| `lv_image_t` / `lv_image_*`             | `lv::Image`        |
+| `lv_animimage_t` / `lv_animimage_*`     | `lv::AnimImage`    |
+| `lv_imagebutton_t` / `lv_imagebutton_*` | `lv::ImageButton`  |
+| `lv_label_t` arc variant                | `lv::ArcLabel`     |
+| `lv_line_t` / `lv_line_*`               | `lv::Line`         |
+| `lv_canvas_t` / `lv_canvas_*`           | `lv::Canvas`       |
+| `lv_chart_t` / `lv_chart_*`             | `lv::Chart`        |
+| `lv_table_t` / `lv_table_*`             | `lv::Table`        |
+| `lv_buttonmatrix_t`                     | `lv::ButtonMatrix` |
+| `lv_scale_t` / `lv_scale_*`             | `lv::Scale`        |
+| `lv_led_t` / `lv_led_*`                 | `lv::Led`          |
+| `lv_list_t` / `lv_list_*`               | `lv::List`         |
+| `lv_msgbox_t` / `lv_msgbox_*`           | `lv::MsgBox`       |
+| `lv_calendar_t` / `lv_calendar_*`       | `lv::Calendar`     |
+| `lv_span_t` / `lv_span_*`               | `lv::Span`         |
+| `lv_spinbox_t` / `lv_spinbox_*`         | `lv::SpinBox`      |
+| `lv_spinner_t` / `lv_spinner_*`         | `lv::Spinner`      |
+| `lv_tabview_t` / `lv_tabview_*`         | `lv::TabView`      |
+| `lv_tileview_t` / `lv_tileview_*`       | `lv::TileView`     |
+| `lv_win_t` / `lv_win_*`                 | `lv::Window`       |
+| `lv_menu_t` / `lv_menu_*`               | `lv::Menu`         |
 
 ---
 
@@ -54,7 +54,7 @@ public:
     Label& set_text_fmt(std::format_string<auto...> fmt, auto&&... args);
     Label& set_long_mode(LabelLongMode mode);
     Label& set_text_align(TextAlign align);
-    Label& set_recolor(bool en);                // inline colour codes
+    Label& set_recolor(bool en);                // inline color codes
     Label& set_text_selection(bool en);
 
     [[nodiscard]] std::string_view text() const noexcept;

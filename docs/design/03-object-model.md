@@ -2,22 +2,22 @@
 
 ## 1. C → C++23 Mapping
 
-| C (LVGL v9.5.0) | C++23 (lvgl-cxx) |
-|---|---|
-| `lv_obj_t` opaque struct | `lv::Object` base class |
-| `lv_obj_class_t` vtable struct | C++ `virtual` dispatch + CRTP mixin |
-| `lv_obj_create(parent)` | `parent.create<WidgetType>(args...)` |
-| `lv_obj_delete(obj)` | RAII – destroy child via `parent.remove_child(ref)` or parent destructor |
-| `lv_obj_add_flag` / `lv_obj_remove_flag` | `obj.add_flag(Flag::Hidden)` |
-| `lv_obj_add_state` / `lv_obj_remove_state` | `obj.add_state(State::Pressed)` |
-| `lv_obj_set_pos`, `lv_obj_set_size` | `obj.set_pos(x,y)`, `obj.set_size(w,h)` |
-| `lv_obj_align` | `obj.align(Align::Center, 0, 0)` |
-| `lv_obj_add_style` | `obj.add_style(style, selector)` |
-| `lv_obj_set_user_data` (void*) | not present; use subclassing or lambda capture |
-| `lv_obj_send_event` | `obj.send_event(EventCode::Clicked)` |
-| `lv_obj_add_event_cb` | `obj.on(EventCode::Clicked, handler)` |
-| `lv_obj_get_child_count` | `obj.child_count()` |
-| `lv_obj_get_child` | `obj.child_at(index)` or range-for |
+| C (LVGL v9.5.0)                            | C++23 (lvgl-cxx)                                                         |
+|--------------------------------------------|--------------------------------------------------------------------------|
+| `lv_obj_t` opaque struct                   | `lv::Object` base class                                                  |
+| `lv_obj_class_t` vtable struct             | C++ `virtual` dispatch + CRTP mixin                                      |
+| `lv_obj_create(parent)`                    | `parent.create<WidgetType>(args...)`                                     |
+| `lv_obj_delete(obj)`                       | RAII – destroy child via `parent.remove_child(ref)` or parent destructor |
+| `lv_obj_add_flag` / `lv_obj_remove_flag`   | `obj.add_flag(Flag::Hidden)`                                             |
+| `lv_obj_add_state` / `lv_obj_remove_state` | `obj.add_state(State::Pressed)`                                          |
+| `lv_obj_set_pos`, `lv_obj_set_size`        | `obj.set_pos(x,y)`, `obj.set_size(w,h)`                                  |
+| `lv_obj_align`                             | `obj.align(Align::Center, 0, 0)`                                         |
+| `lv_obj_add_style`                         | `obj.add_style(style, selector)`                                         |
+| `lv_obj_set_user_data` (void*)             | not present; use subclassing or lambda capture                           |
+| `lv_obj_send_event`                        | `obj.send_event(EventCode::Clicked)`                                     |
+| `lv_obj_add_event_cb`                      | `obj.on(EventCode::Clicked, handler)`                                    |
+| `lv_obj_get_child_count`                   | `obj.child_count()`                                                      |
+| `lv_obj_get_child`                         | `obj.child_at(index)` or range-for                                       |
 
 ## 2. Class Hierarchy
 

@@ -22,7 +22,8 @@
 
 namespace lv {
 
-#if defined(__cpp_lib_move_only_function) && __cpp_lib_move_only_function >= 202110L
+#if defined(__cpp_lib_move_only_function) && \
+    __cpp_lib_move_only_function >= 202110L
 template <typename Sig>
 using UniqueFunction = std::move_only_function<Sig>;
 #else

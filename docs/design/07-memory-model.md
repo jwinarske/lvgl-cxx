@@ -169,12 +169,12 @@ label.set_text(std::format("Temp: {} °C", t));
 
 ## 7. Memory Budget Targets
 
-| Configuration | Flash (kB) | RAM (kB) | Notes |
-|---|---|---|---|
-| Minimal (ArenaAllocator, no widgets) | ~80 | ~8 | Core + display only |
-| Default desktop (SystemAllocator, all widgets) | ~320 | ~64 | Linux/Windows host |
-| Bare-metal embedded (ArenaAllocator, 8 widgets) | ~128 | ~32 | Cortex-M4 |
-| Full-featured (SystemAllocator, all widgets + libs) | ~512 | ~128 | Linux MPU |
+| Configuration                                       | Flash (kB) | RAM (kB) | Notes               |
+|-----------------------------------------------------|------------|----------|---------------------|
+| Minimal (ArenaAllocator, no widgets)                | ~80        | ~8       | Core + display only |
+| Default desktop (SystemAllocator, all widgets)      | ~320       | ~64      | Linux/Windows host  |
+| Bare-metal embedded (ArenaAllocator, 8 widgets)     | ~128       | ~32      | Cortex-M4           |
+| Full-featured (SystemAllocator, all widgets + libs) | ~512       | ~128     | Linux MPU           |
 
 These targets are compile-time enforced via static_assert on policy types where
 possible and are verified by the integration test suite.

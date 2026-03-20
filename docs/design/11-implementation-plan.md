@@ -5,15 +5,15 @@
 The implementation is divided into six phases, each producing a testable
 milestone.  All phases use **Meson** as the build system and target C++23.
 
-| Phase | Milestone | Estimated effort |
-|---|---|---|
-| 0 | Scaffolding, build system, CI | 1 week |
-| 1 | Core: Object tree, flags, states, geometry | 3 weeks |
-| 2 | Style system, themes, transitions | 3 weeks |
-| 3 | Event system, observer, groups | 2 weeks |
-| 4 | Display, draw buffer, software renderer | 4 weeks |
-| 5 | Widget library (all 30+ widgets) | 8 weeks |
-| 6 | Drivers, platform abstractions, integration tests | 3 weeks |
+| Phase | Milestone                                         | Estimated effort |
+|-------|---------------------------------------------------|------------------|
+| 0     | Scaffolding, build system, CI                     | 1 week           |
+| 1     | Core: Object tree, flags, states, geometry        | 3 weeks          |
+| 2     | Style system, themes, transitions                 | 3 weeks          |
+| 3     | Event system, observer, groups                    | 2 weeks          |
+| 4     | Display, draw buffer, software renderer           | 4 weeks          |
+| 5     | Widget library (all 30+ widgets)                  | 8 weeks          |
+| 6     | Drivers, platform abstractions, integration tests | 3 weeks          |
 
 ---
 
@@ -54,7 +54,7 @@ milestone.  All phases use **Meson** as the build system and target C++23.
 ### Checklist
 - [x] `Object::create<T>()` constructs and parents children
 - [x] Parent destructor recursively destroys children
-- [x] `ObjectRef<T>` nullifies on child destroy
+- [x] `ObjectRef<T>` nullifies on child `destroy`
 - [x] Flags and states are bitwise correct
 - [x] `set_pos`, `set_size`, `align` write to Impl fields
 - [x] `children()` returns a correct forward range
@@ -76,8 +76,8 @@ milestone.  All phases use **Meson** as the build system and target C++23.
 
 ### Checklist
 - [x] `Style::set` / `Style::get` round-trip for all property types
-- [x] Cascade resolves state-specific style before default style
-- [x] Part selector restricts style to correct sub-part
+- [x] Cascade resolves state-specific style before the default style
+- [x] Part selector restricts style to correct subpart
 - [x] Transition descriptor stored and retrieved correctly
 - [x] `DefaultTheme::apply()` styles a freshly created `Button`
 - [x] All Phase-2 unit tests pass
@@ -97,11 +97,11 @@ milestone.  All phases use **Meson** as the build system and target C++23.
 ### Checklist
 - [ ] `obj.on(code, fn)` registers handler; fires on `send_event`
 - [ ] Destroying `EventHandle` removes the handler
-- [ ] `e.stop()` prevents subsequent handlers from running
+- [ ] `e.stop()` prevents later handlers from running
 - [ ] Bubbling propagates to parent when `EventBubble` flag set
 - [ ] Trickle propagates to children when `EventTrickle` flag set
 - [ ] `Subject<T>::set()` notifies all subscribers
-- [ ] `ObserverHandle` RAII unsubscribes on destroy
+- [ ] `ObserverHandle` RAII unsubscribes on `destroy`
 - [ ] `Group::focus_next()` / `focus_prev()` cycle correctly
 - [ ] All Phase-3 unit tests pass
 
@@ -137,18 +137,18 @@ milestone.  All phases use **Meson** as the build system and target C++23.
 
 ## Phase 5 – Widget Library (Weeks 14–21)
 
-Widget implementation order (highest priority first):
+Widget implementation order (the highest priority first):
 
-| Week | Widgets |
-|---|---|
-| 14 | `Label`, `Button`, `Container` |
-| 15 | `Slider`, `Bar`, `Arc` |
-| 16 | `Switch`, `Checkbox`, `Led` |
-| 17 | `Dropdown`, `Roller`, `TextArea` |
-| 18 | `Image`, `AnimImage`, `ImageButton` |
-| 19 | `Chart`, `Table`, `ButtonMatrix` |
-| 20 | `Scale`, `SpinBox`, `Spinner`, `ArcLabel` |
-| 21 | `TabView`, `TileView`, `Window`, `Menu`, `MsgBox`, `Calendar`, `List`, `Span` |
+| Week | Widgets                                                                       |
+|------|-------------------------------------------------------------------------------|
+| 14   | `Label`, `Button`, `Container`                                                |
+| 15   | `Slider`, `Bar`, `Arc`                                                        |
+| 16   | `Switch`, `Checkbox`, `Led`                                                   |
+| 17   | `Dropdown`, `Roller`, `TextArea`                                              |
+| 18   | `Image`, `AnimImage`, `ImageButton`                                           |
+| 19   | `Chart`, `Table`, `ButtonMatrix`                                              |
+| 20   | `Scale`, `SpinBox`, `Spinner`, `ArcLabel`                                     |
+| 21   | `TabView`, `TileView`, `Window`, `Menu`, `MsgBox`, `Calendar`, `List`, `Span` |
 
 Each widget follows the same implementation template:
 1. `.hpp` public interface in `include/lvgl/widgets/`
@@ -209,13 +209,13 @@ Weeks 22-24 Phase 6 ── Drivers + Integration + Modules
 
 ## 3. Testing Strategy
 
-| Test type | Framework | Location |
-|---|---|---|
-| Unit tests | [Google Test](https://github.com/google/googletest) (system pkg or gtest.wrap) | `tests/unit/` |
-| Golden-image tests | Built-in PNG comparator | `tests/golden/` |
-| Integration tests | Meson test + QEMU | `tests/integration/` |
-| Static analysis | `clang-tidy` + CodeQL | CI only |
-| Sanitizers | ASan + UBSan + TSan (GCC/Clang) | CI debug preset |
+| Test type          | Framework                                                                      | Location             |
+|--------------------|--------------------------------------------------------------------------------|----------------------|
+| Unit tests         | [Google Test](https://github.com/google/googletest) (system pkg or gtest.wrap) | `tests/unit/`        |
+| Golden-image tests | Built-in PNG comparator                                                        | `tests/golden/`      |
+| Integration tests  | Meson test + QEMU                                                              | `tests/integration/` |
+| Static analysis    | `clang-tidy` + CodeQL                                                          | CI only              |
+| Sanitizers         | ASan + UBSan + TSan (GCC/Clang)                                                | CI debug preset      |
 
 ### Meson test presets
 
@@ -234,29 +234,29 @@ Workflow files live in `.github/workflows/`.
 
 ### `ci.yml` — Build & Test
 
-| Runner | Compiler | C++ std | Arch |
-|---|---|---|---|
-| ubuntu-24.04 | GCC 14 (`gcc-14`) | C++23 | x64 |
-| ubuntu-24.04 | Clang 19 (`clang-19`) | C++23 | x64 |
-| fedora:latest (container) | GCC (latest) | C++23 | x64 |
-| fedora:latest (container) | Clang (latest) | C++23 | x64 |
-| macos-15 | Apple Clang 16 (Xcode 16) | C++23 | arm64 |
-| macos-15 | LLVM 19 (Homebrew) | C++23 | arm64 |
-| macos-13 | LLVM 19 (Homebrew) | C++23 | x64 |
-| windows-2022 | MSVC 19.x (`/std:c++latest`) | C++23 | x64 |
-| windows-11-arm | MSVC 19.x (`/std:c++latest`) | C++23 | **arm64** |
+| Runner                    | Compiler                     | C++ std | Arch      |
+|---------------------------|------------------------------|---------|-----------|
+| ubuntu-24.04              | GCC 14 (`gcc-14`)            | C++23   | x64       |
+| ubuntu-24.04              | Clang 19 (`clang-19`)        | C++23   | x64       |
+| fedora:latest (container) | GCC (latest)                 | C++23   | x64       |
+| fedora:latest (container) | Clang (latest)               | C++23   | x64       |
+| macos-15                  | Apple Clang 16 (Xcode 16)    | C++23   | arm64     |
+| macos-15                  | LLVM 19 (Homebrew)           | C++23   | arm64     |
+| macos-13                  | LLVM 19 (Homebrew)           | C++23   | x64       |
+| windows-2022              | MSVC 19.x (`/std:c++latest`) | C++23   | x64       |
+| windows-11-arm            | MSVC 19.x (`/std:c++latest`) | C++23   | **arm64** |
 
 ### `lint.yml` — Code Quality
 
-| Job | Tool | Runner |
-|---|---|---|
-| clang-format | clang-format-19 (`--dry-run -Werror`) | ubuntu-24.04 |
-| clang-tidy | clang-tidy-19 (`--warnings-as-errors='*'`) | ubuntu-24.04 |
+| Job          | Tool                                       | Runner       |
+|--------------|--------------------------------------------|--------------|
+| clang-format | clang-format-19 (`--dry-run -Werror`)      | ubuntu-24.04 |
+| clang-tidy   | clang-tidy-19 (`--warnings-as-errors='*'`) | ubuntu-24.04 |
 
 ### `codeql.yml` — Security Analysis
 
-| Job | Language | Runner | Schedule |
-|---|---|---|---|
+| Job     | Language                                         | Runner       | Schedule      |
+|---------|--------------------------------------------------|--------------|---------------|
 | analyze | C/C++ (`security-extended,security-and-quality`) | ubuntu-24.04 | push + weekly |
 
 > **Sanitizers** are enabled via `-Denable_sanitizers=true` in the

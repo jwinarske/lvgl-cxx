@@ -121,10 +121,48 @@ lvgl_cxx_sources = files(
   # Phase 3 – Events / Observer / Group
   'src/core/observer.cpp',
   'src/core/group.cpp',
-  # Phase 4 – Display / Renderer / Animations
-  # 'src/draw/sw/software_renderer.cpp',
-  # 'src/core/display.cpp',
+  # Phase 4 – Display / Renderer / Animations / Fonts
+  'src/core/display.cpp',
+  'src/core/animation.cpp',
+  'src/misc/font.cpp',
+  'src/misc/font_montserrat_14.cpp',
+  'src/misc/font_montserrat_20.cpp',
+  'src/misc/font_montserrat_24.cpp',
+  'src/misc/font_montserrat_26.cpp',
   # Phase 5 – Widgets (one file per widget)
+  'src/widgets/label.cpp',
+  'src/widgets/button.cpp',
+  'src/widgets/container.cpp',
+  'src/widgets/slider.cpp',
+  'src/widgets/bar.cpp',
+  'src/widgets/arc.cpp',
+  'src/widgets/switch.cpp',
+  'src/widgets/checkbox.cpp',
+  'src/widgets/led.cpp',
+  'src/widgets/dropdown.cpp',
+  'src/widgets/roller.cpp',
+  'src/widgets/textarea.cpp',
+  'src/widgets/image.cpp',
+  'src/widgets/animimage.cpp',
+  'src/widgets/imagebutton.cpp',
+  'src/widgets/chart.cpp',
+  'src/widgets/table.cpp',
+  'src/widgets/buttonmatrix.cpp',
+  'src/widgets/scale.cpp',
+  'src/widgets/spinbox.cpp',
+  'src/widgets/spinner.cpp',
+  'src/widgets/arclabel.cpp',
+  'src/widgets/line.cpp',
+  'src/widgets/canvas.cpp',
+  'src/widgets/keyboard.cpp',
+  'src/widgets/tabview.cpp',
+  'src/widgets/tileview.cpp',
+  'src/widgets/window.cpp',
+  'src/widgets/menu.cpp',
+  'src/widgets/msgbox.cpp',
+  'src/widgets/calendar.cpp',
+  'src/widgets/list.cpp',
+  'src/widgets/span.cpp',
 )
 
 # ── Module interface units (Phase 6, GCC/Clang modules support) ──────────────
@@ -167,6 +205,36 @@ install_headers(
 )
 install_subdir('include/lvgl/core',    install_dir : 'include/lvgl')
 install_subdir('include/lvgl/misc',    install_dir : 'include/lvgl')
+install_subdir('include/lvgl/draw',    install_dir : 'include/lvgl')
+install_subdir('include/lvgl/tick',    install_dir : 'include/lvgl')
+install_subdir('include/lvgl/widgets', install_dir : 'include/lvgl')
+install_subdir('include/lvgl/drivers', install_dir : 'include/lvgl')
+
+# ── Examples (optional) ───────────────────────────────────────────────────────
+sdl2_dep = dependency('sdl2', required : false)
+if sdl2_dep.found()
+  foreach demo : [
+    ['sdl2_demo',           'examples/sdl2_demo.cpp'],
+    ['get_started_1',       'examples/get_started_1.cpp'],
+    ['get_started_2',       'examples/get_started_2.cpp'],
+    ['get_started_3',       'examples/get_started_3.cpp'],
+    ['get_started_4',       'examples/get_started_4.cpp'],
+    ['demo_widgets',        'examples/demo_widgets.cpp'],
+    ['demo_stress',         'examples/demo_stress.cpp'],
+    ['demo_benchmark',      'examples/demo_benchmark.cpp'],
+    ['demo_keypad_encoder', 'examples/demo_keypad_encoder.cpp'],
+    ['demo_music',          'examples/demo_music.cpp'],
+  ]
+    executable(
+      demo[0],
+      demo[1],
+      include_directories : inc,
+      dependencies : [lvgl_cxx_dep, sdl2_dep],
+      cpp_args : extra_args,
+      install : false,
+    )
+  endforeach
+endif
 
 # ── Tests ─────────────────────────────────────────────────────────────────────
 if opt_tests

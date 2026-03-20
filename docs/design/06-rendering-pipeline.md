@@ -2,22 +2,22 @@
 
 ## 1. C → C++23 Mapping
 
-| C (LVGL v9.5.0) | C++23 (lvgl-cxx) |
-|---|---|
-| `lv_display_t` struct | `lv::Display` class |
-| `lv_display_set_flush_cb` | Constructor / policy template parameter |
-| `lv_draw_buf_t` | `lv::DrawBuffer` (owns `std::mdspan<Pixel,2>`) |
-| `lv_draw_task_t` | `lv::DrawTask` variant |
-| `lv_layer_t` | `lv::Layer` |
-| `lv_draw_rect_dsc_t` | `lv::RectDescriptor` |
-| `lv_draw_label_dsc_t` | `lv::LabelDescriptor` |
-| `lv_draw_image_dsc_t` | `lv::ImageDescriptor` |
-| `lv_draw_line_dsc_t` | `lv::LineDescriptor` |
-| `lv_draw_arc_dsc_t`  | `lv::ArcDescriptor` |
-| `lv_draw_triangle_dsc_t` | `lv::TriangleDescriptor` |
-| Software renderer | `lv::SoftwareRenderer` (concept-satisfying class) |
-| `lv_refr_now` | `display.refresh()` |
-| `lv_obj_invalidate` | `obj.invalidate()` |
+| C (LVGL v9.5.0)           | C++23 (lvgl-cxx)                                  |
+|---------------------------|---------------------------------------------------|
+| `lv_display_t` struct     | `lv::Display` class                               |
+| `lv_display_set_flush_cb` | Constructor / policy template parameter           |
+| `lv_draw_buf_t`           | `lv::DrawBuffer` (owns `std::mdspan<Pixel,2>`)    |
+| `lv_draw_task_t`          | `lv::DrawTask` variant                            |
+| `lv_layer_t`              | `lv::Layer`                                       |
+| `lv_draw_rect_dsc_t`      | `lv::RectDescriptor`                              |
+| `lv_draw_label_dsc_t`     | `lv::LabelDescriptor`                             |
+| `lv_draw_image_dsc_t`     | `lv::ImageDescriptor`                             |
+| `lv_draw_line_dsc_t`      | `lv::LineDescriptor`                              |
+| `lv_draw_arc_dsc_t`       | `lv::ArcDescriptor`                               |
+| `lv_draw_triangle_dsc_t`  | `lv::TriangleDescriptor`                          |
+| Software renderer         | `lv::SoftwareRenderer` (concept-satisfying class) |
+| `lv_refr_now`             | `display.refresh()`                               |
+| `lv_obj_invalidate`       | `obj.invalidate()`                                |
 
 ## 2. Display Class
 
@@ -179,7 +179,7 @@ static_assert(Renderer<SoftwareRenderer, color::ARGB8888::pixel_type>);
 
 ## 6. Layer
 
-A `Layer` is an intermediate render target (e.g. for opacity groups,
+A `Layer` is an intermediate render target (e.g., for opacity groups,
 transformations, or snapshot widgets):
 
 ```cpp

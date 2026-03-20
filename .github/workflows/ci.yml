@@ -148,12 +148,6 @@ jobs:
             compiler: llvm-19
             CC: ""        # set after brew install in step
             CXX: ""
-          # x64 — Intel, LLVM 19 from Homebrew
-          - os: macos-13
-            os-name: "13-x64"
-            compiler: llvm-19
-            CC: ""
-            CXX: ""
 
     runs-on: ${{ matrix.os }}
 

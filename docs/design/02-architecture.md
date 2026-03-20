@@ -25,16 +25,16 @@ lvgl.misc  ←──────────────────── lvgl.
 
 ### Sub-module responsibilities
 
-| Module | Exported symbols |
-|---|---|
-| `lvgl.misc` | `Color`, `Area`, `Point`, `Font`, `Timer`, `Tick`, `Log`, allocators |
-| `lvgl.core` | `Object`, `Group`, `Screen`, `Observer`, `Subject` |
-| `lvgl.style` | `Style`, `StyleSheet`, `Theme`, `Transition` |
-| `lvgl.anim` | `Animation`, `AnimationTimeline`, easing functions |
-| `lvgl.display` | `Display`, `DrawBuffer`, `Layer` |
-| `lvgl.indev` | `InputDevice`, `Pointer`, `Encoder`, `Keypad` |
-| `lvgl.widgets` | All concrete widget classes |
-| `lvgl.drivers` | Platform driver traits / concept definitions |
+| Module         | Exported symbols                                                     |
+|----------------|----------------------------------------------------------------------|
+| `lvgl.misc`    | `Color`, `Area`, `Point`, `Font`, `Timer`, `Tick`, `Log`, allocators |
+| `lvgl.core`    | `Object`, `Group`, `Screen`, `Observer`, `Subject`                   |
+| `lvgl.style`   | `Style`, `StyleSheet`, `Theme`, `Transition`                         |
+| `lvgl.anim`    | `Animation`, `AnimationTimeline`, easing functions                   |
+| `lvgl.display` | `Display`, `DrawBuffer`, `Layer`                                     |
+| `lvgl.indev`   | `InputDevice`, `Pointer`, `Encoder`, `Keypad`                        |
+| `lvgl.widgets` | All concrete widget classes                                          |
+| `lvgl.drivers` | Platform driver traits / concept definitions                         |
 
 ## 2. Layer Dependency Rules
 
@@ -143,11 +143,11 @@ setups:
 
 ## 8. Error Handling Strategy
 
-| Severity | Mechanism |
-|---|---|
+| Severity                                    | Mechanism                                                             |
+|---------------------------------------------|-----------------------------------------------------------------------|
 | Programming errors (precondition violation) | `lv::assert()` → `std::terminate()` in debug; `[[assume]]` in release |
-| Recoverable API errors | `std::expected<T, lv::Error>` return values |
-| Resource exhaustion | `std::expected` with `lv::Error::OutOfMemory` |
-| Driver / platform failures | `std::expected` propagated to caller |
+| Recoverable API errors                      | `std::expected<T, lv::Error>` return values                           |
+| Resource exhaustion                         | `std::expected` with `lv::Error::OutOfMemory`                         |
+| Driver / platform failures                  | `std::expected` propagated to caller                                  |
 
 Exceptions are **not used** (compatible with `-fno-exceptions` builds).

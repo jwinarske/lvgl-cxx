@@ -2,17 +2,17 @@
 
 ## 1. C → C++23 Mapping
 
-| C (LVGL v9.5.0) | C++23 (lvgl-cxx) |
-|---|---|
-| `lv_style_t` struct | `lv::Style` value type |
-| `lv_style_prop_t` enum | `lv::StyleProp<Tag>` typed descriptors |
-| `lv_style_value_t` union | `std::variant<int32_t, Color, Font*, …>` |
-| `lv_style_init` / `lv_style_reset` | Constructor / destructor |
-| `lv_style_set_*` free functions | `style.set(StyleProp::BgColor, …)` |
-| `lv_obj_add_style` | `obj.add_style(style, selector)` |
-| `lv_style_selector_t` | `lv::StyleSelector` bitmask (state + part) |
-| `lv_theme_t` struct | `lv::Theme` abstract base class |
-| `lv_style_transition_dsc_t` | `lv::Transition` value type |
+| C (LVGL v9.5.0)                    | C++23 (lvgl-cxx)                           |
+|------------------------------------|--------------------------------------------|
+| `lv_style_t` struct                | `lv::Style` value type                     |
+| `lv_style_prop_t` enum             | `lv::StyleProp<Tag>` typed descriptors     |
+| `lv_style_value_t` union           | `std::variant<int32_t, Color, Font*, …>`   |
+| `lv_style_init` / `lv_style_reset` | Constructor / destructor                   |
+| `lv_style_set_*` free functions    | `style.set(StyleProp::BgColor, …)`         |
+| `lv_obj_add_style`                 | `obj.add_style(style, selector)`           |
+| `lv_style_selector_t`              | `lv::StyleSelector` bitmask (state + part) |
+| `lv_theme_t` struct                | `lv::Theme` abstract base class            |
+| `lv_style_transition_dsc_t`        | `lv::Transition` value type                |
 
 ## 2. Style Value Type
 
@@ -24,7 +24,7 @@ namespace lv {
 using StyleValue = std::variant<
     std::monostate,      // "not set"
     int32_t,             // coords, radii, opacities, enums
-    Color,               // background, border, text colours
+    Color,               // background, border, text colors
     ColorFilter,         // gradient descriptor
     const Font*,         // font pointer (non-owning)
     const void*,         // image source (non-owning)
@@ -192,7 +192,7 @@ public:
     // Implementations call obj.add_style(…) to apply default styles.
     virtual void apply(Object& obj) = 0;
 
-    // Optional: provide a colour palette for other subsystems
+    // Optional: provide a color palette for other subsystems
     virtual Color primary_color()   const noexcept { return Color::Black; }
     virtual Color secondary_color() const noexcept { return Color::Black; }
 };
