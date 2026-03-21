@@ -1,0 +1,127 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2025 LVGL Kft
+# Copyright (c) 2026 Joel Winarske
+#
+# User-visible build options for lvgl-cxx.
+# Configure with:  meson setup build -D<option>=<value>
+
+# ── Color format ─────────────────────────────────────────────────────────────
+option(
+  'color_format',
+  type    : 'combo',
+  choices : ['argb8888', 'rgb888', 'rgb565', 'l8'],
+  value   : 'argb8888',
+  description : 'Pixel color format used by the display and draw buffers',
+)
+
+# ── Layout engines ────────────────────────────────────────────────────────────
+option(
+  'use_flex',
+  type        : 'boolean',
+  value       : true,
+  description : 'Enable the Flexbox layout engine',
+)
+option(
+  'use_grid',
+  type        : 'boolean',
+  value       : true,
+  description : 'Enable the CSS Grid layout engine',
+)
+
+# ── Optional subsystems ───────────────────────────────────────────────────────
+option(
+  'use_animations',
+  type        : 'boolean',
+  value       : true,
+  description : 'Enable the animation subsystem (lv::Animation)',
+)
+option(
+  'use_observer',
+  type        : 'boolean',
+  value       : true,
+  description : 'Enable the observer / data-binding subsystem (lv::Subject<T>)',
+)
+option(
+  'use_shadow',
+  type        : 'boolean',
+  value       : true,
+  description : 'Enable drop-shadow rendering',
+)
+option(
+  'use_outline',
+  type        : 'boolean',
+  value       : true,
+  description : 'Enable outline rendering (border outside the object)',
+)
+option(
+  'use_layer_transform',
+  type        : 'boolean',
+  value       : true,
+  description : 'Enable layer-level scale/rotation transforms',
+)
+option(
+  'use_scroll_anim',
+  type        : 'boolean',
+  value       : true,
+  description : 'Enable animated scrolling (fling / elastic)',
+)
+
+# ── Resource limits ───────────────────────────────────────────────────────────
+option(
+  'max_displays',
+  type        : 'integer',
+  min         : 1,
+  max         : 16,
+  value       : 4,
+  description : 'Maximum number of simultaneous displays',
+)
+option(
+  'max_indev_devices',
+  type        : 'integer',
+  min         : 1,
+  max         : 16,
+  value       : 4,
+  description : 'Maximum number of simultaneous input devices',
+)
+option(
+  'max_animations',
+  type        : 'integer',
+  min         : 1,
+  max         : 256,
+  value       : 64,
+  description : 'Maximum concurrent animations (used by the pool allocator)',
+)
+option(
+  'default_dpi',
+  type        : 'integer',
+  min         : 50,
+  max         : 640,
+  value       : 130,
+  description : 'Default display DPI (used for dp→px scaling)',
+)
+
+# ── Developer options ─────────────────────────────────────────────────────────
+option(
+  'enable_tests',
+  type        : 'boolean',
+  value       : true,
+  description : 'Build and register unit tests (requires Google Test)',
+)
+option(
+  'enable_sanitizers',
+  type        : 'boolean',
+  value       : false,
+  description : 'Enable AddressSanitizer + UBSan (host builds only)',
+)
+option(
+  'enable_lto',
+  type        : 'boolean',
+  value       : false,
+  description : 'Enable link-time optimisation',
+)
+option(
+  'enable_modules',
+  type        : 'boolean',
+  value       : false,
+  description : 'Build C++23 named module interface units (.ixx) — Phase 6',
+)

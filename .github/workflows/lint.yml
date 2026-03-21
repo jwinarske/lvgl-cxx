@@ -1,0 +1,75 @@
+name: Lint
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - "copilot/**"
+  pull_request:
+    branches:
+      - main
+      - master
+
+# Deny all permissions at the workflow level; each job grants only what it needs.
+permissions: {}
+
+jobs:
+# ── clang-format-19 ───────────────────────────────────────────────────────────
+  clang-format:
+    name: clang-format-19
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clang-format-19
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y clang-format-19
+
+      - name: Check C++ formatting
+        run: scripts/format.sh --check
+
+# ── clang-tidy-19 ─────────────────────────────────────────────────────────────
+  clang-tidy:
+    name: clang-tidy-19
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y \
+            meson ninja-build \
+            clang-19 clang++-19 clang-tidy-19
+
+      - name: Install Meson wraps
+        run: meson wrap install catch2
+
+      - name: Configure (generate compile_commands.json)
+        env:
+          CC: clang-19
+          CXX: clang++-19
+        run: |
+          meson setup builddir \
+            -Dcpp_std=c++23 \
+            -Denable_tests=true \
+            --wrap-mode=forcefallback
+
+      - name: Run clang-tidy-19
+        run: |
+          find src include \
+            -name '*.cpp' \
+            -print0 \
+          | xargs -0 -r \
+            clang-tidy-19 \
+              -p builddir \
+              --header-filter="${GITHUB_WORKSPACE}/(include/lvgl|src)/.*\\.(hpp|h)$" \
+              --warnings-as-errors='*'
